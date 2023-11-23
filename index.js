@@ -29,6 +29,7 @@ async function run() {
 
     // Establish and verify connection
       const menuCollection = client.db("restroDB").collection("menu");
+      const contactCollection = client.db("restroDB").collection("contact");
 
 
 
@@ -38,6 +39,13 @@ async function run() {
       const cursor = menuCollection.find({});
       const menu = await cursor.toArray();
       res.send(menu);
+    });
+
+    // all post request
+    app.post('/contact', async (req, res) => {
+      const newContact = req.body;
+      const result = await contactCollection.insertOne(newContact);
+      res.json(result);
     });
 
 
