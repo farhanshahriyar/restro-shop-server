@@ -30,22 +30,39 @@ async function run() {
     // Establish and verify connection
       const menuCollection = client.db("restroDB").collection("menu");
       const contactCollection = client.db("restroDB").collection("contact");
+      const cartCollection = client.db("restroDB").collection("carts");
 
 
 
 
     // all get request
+    //menu collection for get request
     app.get('/menu', async (req, res) => {
       const cursor = menuCollection.find({});
       const menu = await cursor.toArray();
       res.send(menu);
     });
+    // cart collection for get request
+    app.get('/carts', async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const result = await cartCollection.find(query).toArray();
+      res.send(result);
+    });
 
     // all post request
+    //contact collection for post request
     app.post('/contact', async (req, res) => {
       const newContact = req.body;
       const result = await contactCollection.insertOne(newContact);
       res.json(result);
+    });
+
+    //cart collection for post request
+    app.post('/carts', async (req, res) => {
+      const cartItem = req.body;
+      const result = await cartCollection.insertOne(cartItem);
+      res.send(result);
     });
 
 
