@@ -28,14 +28,37 @@ async function run() {
 
 
     // Establish and verify connection
+      const userCollection = client.db("restroDB").collection("users");
       const menuCollection = client.db("restroDB").collection("menu");
       const contactCollection = client.db("restroDB").collection("contact");
       const cartCollection = client.db("restroDB").collection("carts");
 
-
-
+    // all post request
+    //user collection for post request
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email };
+      const existingUser = await userCollection.find(query).toArray();
+      
+      // Check if the user array is not empty, meaning the user already exists
+      if (existingUser.length > 0) {
+        // Stop the function execution and send response here
+        return res.send({ message: 'User already exists', insertedId: null });
+      }
+      
+      // If the user does not exist, insert the new user
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
+    
 
     // all get request
+    // all users collection for get request
+    app.get('/users', async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
     //menu collection for get request
     app.get('/menu', async (req, res) => {
       const cursor = menuCollection.find({});
@@ -65,12 +88,35 @@ async function run() {
       res.send(result);
     });
 
+    // all patch request
+    // role update for patch request from dashboard admin
+    app.patch('/users/admin/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      // const updatedUser = req.body;
+      const updateDoc = {
+        $set: {
+          role: 'admin'
+        },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     // all delete request
     // cart collection for delete request
     app.delete('/carts/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await cartCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // user collection for delete request
+    app.delete('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await userCollection.deleteOne(query);
       res.send(result);
     });
 
